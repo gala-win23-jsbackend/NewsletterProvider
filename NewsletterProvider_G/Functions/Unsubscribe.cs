@@ -18,21 +18,23 @@ public class Unsubscribe(ILogger<Unsubscribe> logger, DataContext context)
     public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
     {
         var body = await new StreamReader(req.Body).ReadToEndAsync();
-        if (!string.IsNullOrEmpty(body))
+        if (!string.IsNullOrWhiteSpace(body))
         {
-            var SubscribeEntity = JsonConvert.DeserializeObject<SubscribeEntity>(body);
-            if (SubscribeEntity != null)
+            var subscribeEntity = JsonConvert.DeserializeObject<SubscribeEntity>(body);
+            if (subscribeEntity != null)
             {
-                var existingSubscriber = await _context.Subscribers.FirstOrDefaultAsync(x => x.Email == SubscribeEntity.Email);
+                var existingSubscriber = await _context.Subscribers.FirstOrDefaultAsync(s => s.Email == subscribeEntity.Email);
                 if (existingSubscriber != null)
                 {
                     _context.Remove(existingSubscriber);
                     await _context.SaveChangesAsync();
-                    return new OkObjectResult(new { Status = 200, Message = "Subscriber wat unsubscribed." });
+                    return new OkObjectResult(new { Status = 200, Message = "Subscriber was unsubscribed" });
                 }
-
             }
+
         }
-        return new BadRequestObjectResult(new { Status = 400, Message = "Invalid request." });
+        _logger.LogError("Unable to subscribe");
+        return new BadRequestObjectResult(new { Status = 400, Message = "Unable to unsubscribe right now." });
     }
 }
+

@@ -8,6 +8,7 @@ public class SubscribeEntity
 {
     [Key]
     public string Email { get; set; } = null!;
+    public string? PreferredEmail { get; set; }
     public bool Circle1 { get; set; }
     public bool Circle2 { get; set; }
     public bool Circle3 { get; set; }
